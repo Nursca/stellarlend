@@ -1170,11 +1170,6 @@ pub fn get_price(env: &Env, asset: &Address) -> Result<i128, OracleError> {
         return Err(OracleError::CircuitBreakerOpen);
     }
 
-    // Try cache first
-    if let Some(cached_price) = get_cached_price(env, asset) {
-        return Ok(cached_price);
-    }
-
     // Aggregate spot from available sources, apply outlier removal.
     let spot = aggregate_spot_price(env, asset)?;
 

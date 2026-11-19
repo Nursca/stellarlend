@@ -314,15 +314,11 @@ pub fn repay_debt(
     position.borrow_interest = position
         .borrow_interest
         .checked_sub(interest_paid)
-        .unwrap_or(0); // Should not underflow, but handle gracefully
-
-    position.debt = position.debt.checked_sub(principal_paid).unwrap_or(0); // Should not underflow, but handle gracefully
-
-    position.borrow_interest = position
-        .borrow_interest
-        .checked_sub(interest_paid)
-        .unwrap_or(0);
-    position.debt = position.debt.checked_sub(principal_paid).unwrap_or(0);
+        .ok_or(RepayError::Overflow)?;
+    position.debt = position
+        .debt
+        .checked_sub(principal_paid)
+        .ok_or(RepayError::Overflow)?;
     position.last_accrual_time = timestamp;
 
     env.storage().persistent().set(&position_key, &position);
@@ -415,7 +411,7 @@ pub fn repay_debt(
     let remaining_debt = position
         .debt
         .checked_add(position.borrow_interest)
-        .unwrap_or(0);
+        .ok_or(RepayError::Overflow)?;
     Ok((remaining_debt, interest_paid, principal_paid))
 }
 
@@ -460,7 +456,10 @@ fn update_user_analytics_repay(
         .total_repayments
         .checked_add(amount)
         .ok_or(RepayError::Overflow)?;
-    analytics.debt_value = analytics.debt_value.checked_sub(amount).unwrap_or(0);
+    analytics.debt_value = analytics
+        .debt_value
+        .checked_sub(amount)
+        .ok_or(RepayError::Overflow)?;
 
     if analytics.debt_value > 0 && analytics.collateral_value > 0 {
         analytics.collateralization_ratio = analytics
@@ -500,7 +499,10 @@ fn update_protocol_analytics_repay(env: &Env, amount: i128) -> Result<(), RepayE
         });
 
     // Update total borrows (decrease by repayment amount)
-    analytics.total_borrows = analytics.total_borrows.checked_sub(amount).unwrap_or(0); // If it underflows, set to 0 (graceful recovery)
+    analytics.total_borrows = analytics
+        .total_borrows
+        .checked_sub(amount)
+        .ok_or(RepayError::Overflow)?;
 
     env.storage().persistent().set(&analytics_key, &analytics);
     Ok(())

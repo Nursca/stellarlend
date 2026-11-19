@@ -73,6 +73,43 @@ pub fn transfer_admin(
     admin::set_admin(&env, new_admin, Some(caller)).map_err(Into::into)
 }
 
+#[no_mangle]
+pub fn set_security_council(
+    env: Env,
+    caller: Address,
+    council: soroban_sdk::Vec<Address>,
+    threshold: u32,
+) -> Result<(), errors::LendingError> {
+    admin::set_security_council(&env, caller, council, threshold).map_err(Into::into)
+}
+
+#[no_mangle]
+pub fn propose_admin_rotation(
+    env: Env,
+    proposer: Address,
+    new_admin: Address,
+) -> Result<(), errors::LendingError> {
+    admin::propose_admin_rotation(&env, proposer, new_admin).map_err(Into::into)
+}
+
+#[no_mangle]
+pub fn approve_admin_rotation(
+    env: Env,
+    approver: Address,
+    new_admin: Address,
+) -> Result<(), errors::LendingError> {
+    admin::approve_admin_rotation(&env, approver, new_admin).map_err(Into::into)
+}
+
+#[no_mangle]
+pub fn execute_admin_rotation(
+    env: Env,
+    executor: Address,
+    new_admin: Address,
+) -> Result<(), errors::LendingError> {
+    admin::execute_admin_rotation(&env, executor, new_admin).map_err(Into::into)
+}
+
 /// Execute a batch of operations packed with compressed calldata encoding (issue #719)
 #[no_mangle]
 pub fn execute_optimized_batch(

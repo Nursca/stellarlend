@@ -568,6 +568,9 @@ pub fn cross_asset_deposit_graceful(
     asset: Option<Address>,
     amount: i128,
 ) -> Result<(AssetPosition, i128, bool), CrossAssetError> {
+    let _guard =
+        crate::reentrancy::ReentrancyGuard::new(env).map_err(|_| CrossAssetError::Reentrancy)?;
+
     user.require_auth();
 
     if amount <= 0 {

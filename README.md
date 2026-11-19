@@ -165,6 +165,17 @@ stellar contract deploy \
 
 **⚠️ Security Note**: Always audit and test thoroughly before deploying to mainnet. Use multisig for admin operations in production.
 
+### Hardened operation policies
+
+- Oracle reads use the active source quorum and reject stale or insufficient
+  source coverage with `NotEnoughSources` or `StalePrice`.
+- Admin key rotation requires a configured security council quorum:
+  `propose_admin_rotation`, `approve_admin_rotation`, then
+  `execute_admin_rotation`.
+- Cross-asset state-changing entrypoints are protected by reentrancy guards.
+- Repayment calculations use checked arithmetic and reject overflow instead of
+  silently corrupting balances.
+
 ---
 
 ## Repository Structure
